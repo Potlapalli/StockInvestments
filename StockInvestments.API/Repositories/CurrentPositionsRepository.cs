@@ -23,7 +23,8 @@ namespace StockInvestments.API.Repositories
 
         public CurrentPosition GetCurrentPosition(string ticker)
         {
-            return _stockInvestmentsContext.CurrentPositions.FirstOrDefault(cp => cp.Ticker == ticker);
+            return _stockInvestmentsContext.CurrentPositions.FirstOrDefault(cp 
+                => string.Equals(cp.Ticker,ticker, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public void Add(CurrentPosition currentPosition)
@@ -45,6 +46,12 @@ namespace StockInvestments.API.Repositories
         {
             _stockInvestmentsContext.CurrentPositions.Remove(currentPosition);
             _stockInvestmentsContext.SaveChanges();
+        }
+
+        public bool CurrentPositionExists(string ticker)
+        {
+            return _stockInvestmentsContext.CurrentPositions.Any(cp 
+                => string.Equals(cp.Ticker, ticker, StringComparison.CurrentCultureIgnoreCase));
         }
     }
 }

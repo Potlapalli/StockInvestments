@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using StockInvestments.API.DbContexts;
 using StockInvestments.API.Repositories;
@@ -28,10 +29,19 @@ namespace StockInvestments.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(setupAction =>
+            {
+                setupAction.ReturnHttpNotAcceptable = true;
+            }).AddXmlDataContractSerializerFormatters();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddDbContext<StockInvestmentsContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionString:StockInvestmentsDB"]));
+
             services.AddScoped<ICurrentPositionsRepository, CurrentPositionsRepository>();
+
+            services.AddScoped<ISoldPositionsRepository, SoldPositionsRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

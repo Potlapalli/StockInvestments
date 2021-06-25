@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using StockInvestments.API.Entities;
+using StockInvestments.API.Models;
 using StockInvestments.API.Repositories;
 
 namespace StockInvestments.API.Controllers
@@ -13,30 +15,35 @@ namespace StockInvestments.API.Controllers
     public class CurrentPositionsController : ControllerBase
     {
         private readonly ICurrentPositionsRepository _currentPositionsRepository;
-        public CurrentPositionsController(ICurrentPositionsRepository currentPositionsRepository)
+        private readonly IMapper _mapper;
+        public CurrentPositionsController(ICurrentPositionsRepository currentPositionsRepository, IMapper mapper)
         {
             _currentPositionsRepository = currentPositionsRepository ??
                                           throw new ArgumentNullException(nameof(currentPositionsRepository));
+            _mapper = mapper ?? 
+                      throw new ArgumentNullException(nameof(mapper));
         }
 
         //Get api/currentPositions
         [HttpGet]
-        public IActionResult GetCurrentPositions()
+        public ActionResult<IEnumerable<CurrentPositionDto>> GetCurrentPositions()
         {
-           var currentPositions =  _currentPositionsRepository.GetCurrentPositions();
-           return Ok(currentPositions);
+           var currentPositionsFromRepo =  _currentPositionsRepository.GetCurrentPositions();
+           return Ok(_mapper.Map<IEnumerable<CurrentPositionDto>>(currentPositionsFromRepo));
         }
 
-        //Get api/currentPositions/5
+        //Get api/currentPositions/xxx
         [HttpGet("{ticker}")]
-        public IActionResult GetCurrentPosition(string ticker)
+        public ActionResult<CurrentPositionDto> GetCurrentPosition(string ticker)
         {
             if (string.IsNullOrEmpty(ticker))
                 return BadRequest("Invalid ticker");
-            var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
-            if (currentPosition == null)
+
+            var currentPositionFromRepo = _currentPositionsRepository.GetCurrentPosition(ticker);
+            if (currentPositionFromRepo == null)
                 return NotFound("Current Position couldn't be found.");
-            return Ok(currentPosition);
+
+            return Ok(_mapper.Map<CurrentPositionDto>(currentPositionFromRepo));
         }
     }
 }

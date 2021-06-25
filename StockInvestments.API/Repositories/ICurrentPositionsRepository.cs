@@ -13,5 +13,6 @@ namespace StockInvestments.API.Repositories
         void Add(CurrentPosition currentPosition);
         void Update(CurrentPosition dbCurrentPosition, CurrentPosition currentPosition);
         void Delete(CurrentPosition currentPosition);
+        bool CurrentPositionExists(string ticker);
     }
 }
