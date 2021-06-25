@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockInvestments.API.DbContexts;
 
 namespace StockInvestments.API.Migrations
 {
     [DbContext(typeof(StockInvestmentsContext))]
-    partial class StockInvestmentsContextModelSnapshot : ModelSnapshot
+    [Migration("20210625041706_Test1")]
+    partial class Test1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,13 +104,6 @@ namespace StockInvestments.API.Migrations
                             Company = "Apple",
                             PurchasePrice = 142.09,
                             TotalShares = 5.0
-                        },
-                        new
-                        {
-                            Ticker = "OSTK",
-                            Company = "Overstock",
-                            PurchasePrice = 91.629999999999995,
-                            TotalShares = 20.0
                         });
                 });
 
@@ -119,19 +114,21 @@ namespace StockInvestments.API.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("CurrentPositionTicker")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<double>("SellingPrice")
                         .HasColumnType("float");
 
                     b.Property<string>("Ticker")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TotalShares")
                         .HasColumnType("float");
 
                     b.HasKey("Number");
 
-                    b.HasIndex("Ticker");
+                    b.HasIndex("CurrentPositionTicker");
 
                     b.ToTable("SoldPositions");
 
@@ -149,9 +146,7 @@ namespace StockInvestments.API.Migrations
                 {
                     b.HasOne("StockInvestments.API.Entities.CurrentPosition", "CurrentPosition")
                         .WithMany("SoldPositions")
-                        .HasForeignKey("Ticker")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CurrentPositionTicker");
 
                     b.Navigation("CurrentPosition");
                 });

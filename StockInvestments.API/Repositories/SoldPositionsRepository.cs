@@ -18,14 +18,12 @@ namespace StockInvestments.API.Repositories
 
         public IEnumerable<SoldPosition> GetSoldPositions(string ticker)
         {
-            return _stockInvestmentsContext.SoldPositions.Where(sp 
-                => string.Equals(sp.Ticker, ticker, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            return _stockInvestmentsContext.SoldPositions.Where(sp => sp.Ticker == ticker).ToList();
         }
 
         public SoldPosition GetSoldPosition(string ticker, long number)
         {
-            return _stockInvestmentsContext.SoldPositions.FirstOrDefault(sp =>
-                string.Equals(sp.Ticker, ticker, StringComparison.CurrentCultureIgnoreCase) && sp.Number == number);
+            return _stockInvestmentsContext.SoldPositions.FirstOrDefault(sp => sp.Ticker == ticker && sp.Number == number);
         }
 
         public void Add(SoldPosition soldPosition)

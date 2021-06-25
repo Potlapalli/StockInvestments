@@ -26,6 +26,7 @@ namespace StockInvestments.API.Controllers
 
         //Get api/currentPositions
         [HttpGet]
+        [HttpHead]
         public ActionResult<IEnumerable<CurrentPositionDto>> GetCurrentPositions()
         {
            var currentPositionsFromRepo =  _currentPositionsRepository.GetCurrentPositions();

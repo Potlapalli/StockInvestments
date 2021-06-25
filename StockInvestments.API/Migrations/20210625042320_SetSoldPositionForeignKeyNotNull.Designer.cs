@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockInvestments.API.DbContexts;
 
 namespace StockInvestments.API.Migrations
 {
     [DbContext(typeof(StockInvestmentsContext))]
-    partial class StockInvestmentsContextModelSnapshot : ModelSnapshot
+    [Migration("20210625042320_SetSoldPositionForeignKeyNotNull")]
+    partial class SetSoldPositionForeignKeyNotNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,13 +104,6 @@ namespace StockInvestments.API.Migrations
                             Company = "Apple",
                             PurchasePrice = 142.09,
                             TotalShares = 5.0
-                        },
-                        new
-                        {
-                            Ticker = "OSTK",
-                            Company = "Overstock",
-                            PurchasePrice = 91.629999999999995,
-                            TotalShares = 20.0
                         });
                 });
 
@@ -134,15 +129,6 @@ namespace StockInvestments.API.Migrations
                     b.HasIndex("Ticker");
 
                     b.ToTable("SoldPositions");
-
-                    b.HasData(
-                        new
-                        {
-                            Number = 1L,
-                            SellingPrice = 91.769999999999996,
-                            Ticker = "OSTK",
-                            TotalShares = 10.0
-                        });
                 });
 
             modelBuilder.Entity("StockInvestments.API.Entities.SoldPosition", b =>

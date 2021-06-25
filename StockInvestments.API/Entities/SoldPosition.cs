@@ -19,8 +19,10 @@ namespace StockInvestments.API.Entities
         [Required(ErrorMessage = "TotalShares is required.")]
         public double TotalShares { get; set; }
 
+        [Required(ErrorMessage = "Ticker is missing.")]
         public string Ticker { get; set; }
 
+        [ForeignKey("Ticker")]
         public CurrentPosition CurrentPosition { get; set; }
     }
 }

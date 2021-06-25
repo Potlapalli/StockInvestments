@@ -39,8 +39,25 @@ namespace StockInvestments.API.DbContexts
                     Company = "Apple",
                     PurchasePrice = 142.09,
                     TotalShares = 5
+                        
+                }, new CurrentPosition
+                {
+                    Ticker = "OSTK",
+                    Company = "Overstock",
+                    PurchasePrice = 91.63,
+                    TotalShares = 20
                 }
             );
+
+            modelBuilder.Entity<SoldPosition>().HasData(new SoldPosition
+            {
+                Number = 1,
+                Ticker = "OSTK",
+                SellingPrice = 91.77,
+                TotalShares = 10
+            }
+            );
+
 
             modelBuilder.Entity<ClosedPosition>().HasData(new ClosedPosition
                 {
