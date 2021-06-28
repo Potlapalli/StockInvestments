@@ -21,6 +21,11 @@ namespace StockInvestments.API.Repositories
             return _stockInvestmentsContext.CurrentPositions.ToList();
         }
 
+        public IEnumerable<CurrentPosition> GetCurrentPositionsFilteredByTotalAmount(double amount)
+        {
+            return _stockInvestmentsContext.CurrentPositions.Where(cp => cp.TotalAmount >= amount).ToList();
+        }
+
         public CurrentPosition GetCurrentPosition(string ticker)
         {
             return _stockInvestmentsContext.CurrentPositions.FirstOrDefault(cp => cp.Ticker == ticker);
@@ -37,6 +42,7 @@ namespace StockInvestments.API.Repositories
             dbCurrentPosition.Company = currentPosition.Company;
             dbCurrentPosition.PurchasePrice = currentPosition.PurchasePrice;
             dbCurrentPosition.TotalShares = currentPosition.TotalShares;
+            dbCurrentPosition.TotalAmount = currentPosition.TotalAmount;
 
             _stockInvestmentsContext.SaveChanges();
         }

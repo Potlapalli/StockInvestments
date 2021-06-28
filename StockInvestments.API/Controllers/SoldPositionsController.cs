@@ -39,6 +39,49 @@ namespace StockInvestments.API.Controllers
             return Ok(_mapper.Map<IEnumerable<SoldPositionDto>>(soldPositionsFromRepo));
         }
 
+        //Get api/soldPositions
+        [Route("/api/soldPositions")]
+        [HttpGet]
+        public ActionResult<IEnumerable<SoldPositionDto>> GetSoldPositions()
+        {
+            var soldPositionsFromRepo = _soldPositionsRepository.GetSoldPositions();
+            return Ok(_mapper.Map<IEnumerable<SoldPositionDto>>(soldPositionsFromRepo));
+        }
+
+        //Get api/currentPositions/xxx/soldPositions/sharesRemaining
+        [Route("sharesRemaining")]
+        [HttpGet]
+        public ActionResult<double> GetSharesRemaining(string ticker)
+        {
+            if (!_currentPositionsRepository.CurrentPositionExists(ticker))
+            {
+                return NotFound($"No current position found for the ticker {ticker}.");
+            }
+
+            var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
+            var sharesRemaining = _soldPositionsRepository.GetSharesRemaining(currentPosition);
+            return Ok(sharesRemaining);
+        }
+
+        //Get api/positionsInProfit
+        [Route("/api/positionsInProfit")]
+        [HttpGet]
+        public ActionResult<IEnumerable<string>> GetPositionsInProfit()
+        {
+            var currentPositions = _currentPositionsRepository.GetCurrentPositions().ToList();
+            var positionsInProfit = _soldPositionsRepository.GetPositionsInProfit(currentPositions);
+            return Ok(positionsInProfit);
+        }
+
+        //Get api/soldPositions/filterByTotalAmount?totalAmountGreaterThan=100
+        [Route("/api/soldPositions/filterByTotalAmount")]
+        [HttpGet]
+        public ActionResult<IEnumerable<SoldPositionDto>> GetSoldPositionsFilteredByTotalAmount([FromQuery] double totalAmountGreaterThan)
+        {
+            var soldPositionsFromRepo = _soldPositionsRepository.GetSoldPositionsFilteredByTotalAmount(totalAmountGreaterThan);
+            return Ok(_mapper.Map<IEnumerable<SoldPositionDto>>(soldPositionsFromRepo));
+        }
+
         //Get api/currentPositions/xxx/soldPositions/1
         [HttpGet("{number}")]
         public ActionResult<SoldPositionDto> GetCurrentPosition(string ticker, long number)

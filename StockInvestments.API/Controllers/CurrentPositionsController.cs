@@ -33,6 +33,15 @@ namespace StockInvestments.API.Controllers
            return Ok(_mapper.Map<IEnumerable<CurrentPositionDto>>(currentPositionsFromRepo));
         }
 
+        //Get api/currentPositions/filterByTotalAmount?totalAmountGreaterThan=100
+        [Route("filterByTotalAmount")]
+        [HttpGet]
+        public ActionResult<IEnumerable<CurrentPositionDto>> GetCurrentPositionsFilteredByTotalAmount([FromQuery] double totalAmountGreaterThan)
+        {
+            var currentPositionsFromRepo = _currentPositionsRepository.GetCurrentPositionsFilteredByTotalAmount(totalAmountGreaterThan);
+            return Ok(_mapper.Map<IEnumerable<CurrentPositionDto>>(currentPositionsFromRepo));
+        }
+
         //Get api/currentPositions/xxx
         [HttpGet("{ticker}")]
         public ActionResult<CurrentPositionDto> GetCurrentPosition(string ticker)

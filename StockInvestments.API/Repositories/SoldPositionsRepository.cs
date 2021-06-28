@@ -16,9 +16,45 @@ namespace StockInvestments.API.Repositories
             _stockInvestmentsContext = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        public IEnumerable<SoldPosition> GetSoldPositions()
+        {
+            return _stockInvestmentsContext.SoldPositions.ToList();
+        }
+
         public IEnumerable<SoldPosition> GetSoldPositions(string ticker)
         {
             return _stockInvestmentsContext.SoldPositions.Where(sp => sp.Ticker == ticker).ToList();
+        }
+
+        public IEnumerable<string> GetPositionsInProfit(List<CurrentPosition> currentPositions)
+        {
+            var tickers = new List<string>();
+            
+            foreach (var currentPosition in currentPositions)
+            {
+                var soldPositions = _stockInvestmentsContext.SoldPositions
+                    .Where(sp => sp.Ticker == currentPosition.Ticker).ToList();
+
+                double totalAmountSum = soldPositions.Sum(soldPosition => soldPosition.TotalAmount);
+
+                if(currentPosition.TotalAmount < totalAmountSum)
+                    tickers.Add(currentPosition.Ticker);
+            }
+
+            return tickers;
+        }
+
+        public double GetSharesRemaining(CurrentPosition currentPosition)
+        {
+            var soldPositions = _stockInvestmentsContext.SoldPositions.Where(sp => sp.Ticker == currentPosition.Ticker).ToList();
+
+            double totalShares = soldPositions.Sum(soldPosition => soldPosition.TotalShares);
+            return currentPosition.TotalShares - totalShares;
+        }
+
+        public IEnumerable<SoldPosition> GetSoldPositionsFilteredByTotalAmount(double amount)
+        {
+            return _stockInvestmentsContext.SoldPositions.Where(sp => sp.TotalAmount >= amount).ToList();
         }
 
         public SoldPosition GetSoldPosition(string ticker, long number)
@@ -36,6 +72,7 @@ namespace StockInvestments.API.Repositories
         {
             dbSoldPosition.SellingPrice = soldPosition.SellingPrice;
             dbSoldPosition.TotalShares = soldPosition.TotalShares;
+            dbSoldPosition.TotalAmount = soldPosition.TotalAmount;
 
             _stockInvestmentsContext.SaveChanges();
         }

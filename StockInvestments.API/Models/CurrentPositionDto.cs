@@ -14,5 +14,7 @@ namespace StockInvestments.API.Models
         public double PurchasePrice { get; set; }
 
         public double TotalShares { get; set; }
+
+        public double TotalAmount { get; set; }
     }
 }

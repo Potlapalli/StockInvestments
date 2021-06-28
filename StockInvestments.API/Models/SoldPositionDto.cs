@@ -14,5 +14,7 @@ namespace StockInvestments.API.Models
         public double TotalShares { get; set; }
 
         public string Ticker { get; set; }
+
+        public double TotalAmount { get; set; }
     }
 }
