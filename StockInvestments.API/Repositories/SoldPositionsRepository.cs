@@ -28,20 +28,11 @@ namespace StockInvestments.API.Repositories
 
         public IEnumerable<string> GetPositionsInProfit(List<CurrentPosition> currentPositions)
         {
-            var tickers = new List<string>();
-            
-            foreach (var currentPosition in currentPositions)
-            {
-                var soldPositions = _stockInvestmentsContext.SoldPositions
-                    .Where(sp => sp.Ticker == currentPosition.Ticker).ToList();
-
-                double totalAmountSum = soldPositions.Sum(soldPosition => soldPosition.TotalAmount);
-
-                if(currentPosition.TotalAmount < totalAmountSum)
-                    tickers.Add(currentPosition.Ticker);
-            }
-
-            return tickers;
+            return (from currentPosition in currentPositions 
+                let soldPositions = _stockInvestmentsContext.SoldPositions.
+                    Where(sp => sp.Ticker == currentPosition.Ticker).ToList() 
+                let totalAmountSum = soldPositions.Sum(soldPosition => soldPosition.TotalAmount) 
+                where currentPosition.TotalAmount < totalAmountSum select currentPosition.Ticker).ToList();
         }
 
         public double GetSharesRemaining(CurrentPosition currentPosition)
@@ -62,8 +53,13 @@ namespace StockInvestments.API.Repositories
             return _stockInvestmentsContext.SoldPositions.FirstOrDefault(sp => sp.Ticker == ticker && sp.Number == number);
         }
 
-        public void Add(SoldPosition soldPosition)
+        public void Add(string ticker, SoldPosition soldPosition)
         {
+            if (soldPosition == null)
+            {
+                throw new ArgumentNullException(nameof(soldPosition));
+            }
+            soldPosition.Ticker = ticker;
             _stockInvestmentsContext.SoldPositions.Add(soldPosition);
             _stockInvestmentsContext.SaveChanges();
         }

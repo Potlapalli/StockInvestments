@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using StockInvestments.API.Entities;
+using StockInvestments.API.Helpers;
 using StockInvestments.API.Models;
 using StockInvestments.API.Repositories;
 
@@ -43,7 +45,7 @@ namespace StockInvestments.API.Controllers
         }
 
         //Get api/currentPositions/xxx
-        [HttpGet("{ticker}")]
+        [HttpGet("{ticker}", Name = "GetCurrentPosition")]
         public ActionResult<CurrentPositionDto> GetCurrentPosition(string ticker)
         {
             if (string.IsNullOrEmpty(ticker))
@@ -54,6 +56,58 @@ namespace StockInvestments.API.Controllers
                 return NotFound("Current Position couldn't be found.");
 
             return Ok(_mapper.Map<CurrentPositionDto>(currentPositionFromRepo));
+        }
+
+        //Get api/currentPositions/xxx,yyy
+        [HttpGet("({tickers})", Name = "GetCurrentPositionCollection")]
+        public ActionResult<IEnumerable<CurrentPositionDto>> GetCurrentPositionCollection([FromRoute]
+            [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> tickers)
+        {
+            if (tickers == null)
+                return BadRequest();
+
+            var currentPositionsFromRepo = _currentPositionsRepository.GetCurrentPositions(tickers.ToList());
+            if (tickers.Count() != currentPositionsFromRepo.Count())
+                return NotFound();
+
+            return Ok(_mapper.Map<IEnumerable<CurrentPositionDto>>(currentPositionsFromRepo));
+        }
+
+        //Post api/currentPositions
+        [HttpPost]
+        public ActionResult<CurrentPositionDto> CreateCurrentPosition(CurrentPositionForCreationDto currentPosition)
+        {
+            var currentPositionEntity = _mapper.Map<CurrentPosition>(currentPosition);
+            _currentPositionsRepository.Add(currentPositionEntity);
+
+            var currentPositionToReturn = _mapper.Map<CurrentPositionDto>(currentPositionEntity);
+            return CreatedAtRoute("GetCurrentPosition", new {ticker = currentPositionToReturn.Ticker},
+                currentPositionToReturn);
+        }
+
+        //Post api/currentPositionsCollection
+        [Route("/api/currentPositionsCollection")]
+        [HttpPost]
+        public ActionResult<IEnumerable<CurrentPositionDto>> CreateCurrentPositionCollection(IEnumerable<CurrentPositionForCreationDto> currentPositionCollection)
+        {
+            var currentPositionsEntity = _mapper.Map<IEnumerable<CurrentPosition>>(currentPositionCollection);
+            foreach (var currentPositionEntity in currentPositionsEntity)
+            {
+                _currentPositionsRepository.Add(currentPositionEntity);
+            }
+            
+            var currentPositionsToReturn = _mapper.Map<IEnumerable<CurrentPositionDto>>(currentPositionsEntity);
+            var tickers = string.Join(",", currentPositionsToReturn.Select(cp => cp.Ticker));
+            return CreatedAtRoute("GetCurrentPositionCollection", new { tickers = tickers },
+                currentPositionsToReturn);
+        }
+
+        //Options api/currentPositions
+        [HttpOptions]
+        public IActionResult GetCurrentPositionsOptions()
+        {
+            Response.Headers.Add("Allow", "GET,OPTIONS,POST,PUT,DELETE");
+            return Ok();
         }
     }
 }

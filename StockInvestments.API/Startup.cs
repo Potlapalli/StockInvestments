@@ -43,6 +43,10 @@ namespace StockInvestments.API
             services.AddScoped<ICurrentPositionsRepository, CurrentPositionsRepository>();
 
             services.AddScoped<ISoldPositionsRepository, SoldPositionsRepository>();
+
+            services.AddScoped<IStockEarningsRepository, StockEarningsRepository>();
+
+            services.AddScoped<IClosedPositionsRepository, ClosedPositionsRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using StockInvestments.API.Entities;
 using StockInvestments.API.Models;
 using StockInvestments.API.Repositories;
 
@@ -83,8 +84,8 @@ namespace StockInvestments.API.Controllers
         }
 
         //Get api/currentPositions/xxx/soldPositions/1
-        [HttpGet("{number}")]
-        public ActionResult<SoldPositionDto> GetCurrentPosition(string ticker, long number)
+        [HttpGet("{number}", Name = "GetSoldPositionForCurrentPosition")]
+        public ActionResult<SoldPositionDto> GetSoldPositionForCurrentPosition(string ticker, long number)
         {
             if (!_currentPositionsRepository.CurrentPositionExists(ticker))
             {
@@ -96,6 +97,23 @@ namespace StockInvestments.API.Controllers
                 return NotFound("Sold Position couldn't be found.");
 
             return Ok(_mapper.Map<SoldPositionDto>(soldPositionFromRepo));
+        }
+
+        //Get api/currentPositions/xxx/soldPositions
+        [HttpPost]
+        public ActionResult<SoldPositionDto> CreateSoldPosition(string ticker, SoldPositionForCreationDto soldPosition)
+        {
+            if (!_currentPositionsRepository.CurrentPositionExists(ticker))
+            {
+                return NotFound($"No current position found for the ticker {ticker}.");
+            }
+
+            var soldPositionEntity = _mapper.Map<SoldPosition>(soldPosition);
+            _soldPositionsRepository.Add(ticker, soldPositionEntity);
+
+            var soldPositionToReturn = _mapper.Map<SoldPositionDto>(soldPositionEntity);
+            return CreatedAtRoute("GetSoldPositionForCurrentPosition", new { ticker = ticker, number = soldPositionToReturn.Number },
+                soldPositionToReturn);
         }
     }
 }

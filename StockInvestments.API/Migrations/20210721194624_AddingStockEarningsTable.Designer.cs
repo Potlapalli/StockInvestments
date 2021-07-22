@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockInvestments.API.DbContexts;
 
 namespace StockInvestments.API.Migrations
 {
     [DbContext(typeof(StockInvestmentsContext))]
-    partial class StockInvestmentsContextModelSnapshot : ModelSnapshot
+    [Migration("20210721194624_AddingStockEarningsTable")]
+    partial class AddingStockEarningsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,9 +165,6 @@ namespace StockInvestments.API.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Company")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EarningsCallTime")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("EarningsDate")

@@ -19,6 +19,9 @@ namespace StockInvestments.API.Entities
         [Required(ErrorMessage = "TotalShares is required.")]
         public double TotalShares { get; set; }
 
+        [Required(ErrorMessage = "TotalAmount is missing.")]
+        public double TotalAmount { get; set; }
+
         public ICollection<SoldPosition> SoldPositions { get; set; } = new List<SoldPosition>();
     }
 }

@@ -18,6 +18,7 @@ namespace StockInvestments.API.DbContexts
         public DbSet<CurrentPosition> CurrentPositions { get; set; }
         public DbSet<SoldPosition> SoldPositions { get; set; }
         public DbSet<ClosedPosition> ClosedPositions { get; set; }
+        public DbSet<StockEarning> StockEarnings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,26 +27,30 @@ namespace StockInvestments.API.DbContexts
                     Ticker = "NKLA",
                     Company = "Nikola",
                     PurchasePrice = 81.625,
-                    TotalShares = 2
+                    TotalShares = 2,
+                    TotalAmount = 163.25
                 }, new CurrentPosition
                 {
                     Ticker = "ETSY",
                     Company = "Etsy",
                     PurchasePrice = 204.79,
-                    TotalShares = 2
+                    TotalShares = 2,
+                    TotalAmount = 409.58
                 }, new CurrentPosition
                 {
                     Ticker = "AAPL",
                     Company = "Apple",
                     PurchasePrice = 142.09,
-                    TotalShares = 5
-                        
+                    TotalShares = 5,
+                    TotalAmount = 710.45
+
                 }, new CurrentPosition
                 {
                     Ticker = "OSTK",
                     Company = "Overstock",
                     PurchasePrice = 91.63,
-                    TotalShares = 20
+                    TotalShares = 20,
+                    TotalAmount = 1832.6
                 }
             );
 
@@ -54,7 +59,8 @@ namespace StockInvestments.API.DbContexts
                 Number = 1,
                 Ticker = "OSTK",
                 SellingPrice = 91.77,
-                TotalShares = 10
+                TotalShares = 10,
+                TotalAmount = 917.7
             }
             );
 

@@ -9,6 +9,7 @@ namespace StockInvestments.API.Repositories
     public interface ICurrentPositionsRepository
     {
         IEnumerable<CurrentPosition> GetCurrentPositions();
+        IEnumerable<CurrentPosition> GetCurrentPositions(List<string> tickers);
         IEnumerable<CurrentPosition> GetCurrentPositionsFilteredByTotalAmount(double amount);
         CurrentPosition GetCurrentPosition(string ticker);
         void Add(CurrentPosition currentPosition);

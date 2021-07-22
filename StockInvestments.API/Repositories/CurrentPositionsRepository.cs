@@ -21,6 +21,11 @@ namespace StockInvestments.API.Repositories
             return _stockInvestmentsContext.CurrentPositions.ToList();
         }
 
+        public IEnumerable<CurrentPosition> GetCurrentPositions(List<string> tickers)
+        {
+            return _stockInvestmentsContext.CurrentPositions.Where(cp => tickers.Contains(cp.Ticker)).ToList();
+        }
+
         public IEnumerable<CurrentPosition> GetCurrentPositionsFilteredByTotalAmount(double amount)
         {
             return _stockInvestmentsContext.CurrentPositions.Where(cp => cp.TotalAmount >= amount).ToList();
@@ -33,6 +38,10 @@ namespace StockInvestments.API.Repositories
 
         public void Add(CurrentPosition currentPosition)
         {
+            if (currentPosition == null)
+            {
+                throw new ArgumentNullException(nameof(currentPosition));
+            }
             _stockInvestmentsContext.CurrentPositions.Add(currentPosition);
             _stockInvestmentsContext.SaveChanges();
         }

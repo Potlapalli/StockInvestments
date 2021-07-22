@@ -14,8 +14,8 @@ namespace StockInvestments.API.Repositories
         double GetSharesRemaining(CurrentPosition currentPosition);
         IEnumerable<SoldPosition> GetSoldPositionsFilteredByTotalAmount(double amount);
         SoldPosition GetSoldPosition(string ticker, long number);
-        void Add(SoldPosition SoldPosition);
-        void Update(SoldPosition dbSoldPosition, SoldPosition SoldPosition);
-        void Delete(SoldPosition SoldPosition);
+        void Add(string ticker, SoldPosition soldPosition);
+        void Update(SoldPosition dbSoldPosition, SoldPosition soldPosition);
+        void Delete(SoldPosition soldPosition);
     }
 }

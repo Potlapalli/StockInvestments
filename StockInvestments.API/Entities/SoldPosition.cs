@@ -19,6 +19,9 @@ namespace StockInvestments.API.Entities
         [Required(ErrorMessage = "TotalShares is required.")]
         public double TotalShares { get; set; }
 
+        [Required(ErrorMessage = "TotalAmount is missing.")]
+        public double TotalAmount { get; set; }
+
         [Required(ErrorMessage = "Ticker is missing.")]
         public string Ticker { get; set; }
 

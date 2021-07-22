@@ -11,6 +11,7 @@ namespace StockInvestments.API.Profiles
         public CurrentPositionsProfile()
         {
             CreateMap<Entities.CurrentPosition, Models.CurrentPositionDto>();
+            CreateMap<Models.CurrentPositionForCreationDto, Entities.CurrentPosition>();
         }
     }
 }
