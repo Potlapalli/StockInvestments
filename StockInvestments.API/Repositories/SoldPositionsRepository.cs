@@ -7,10 +7,17 @@ using StockInvestments.API.Entities;
 
 namespace StockInvestments.API.Repositories
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class SoldPositionsRepository : ISoldPositionsRepository
     {
         private readonly StockInvestmentsContext _stockInvestmentsContext;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
         public SoldPositionsRepository(StockInvestmentsContext context)
         {
             _stockInvestmentsContext = context ?? throw new ArgumentNullException(nameof(context));

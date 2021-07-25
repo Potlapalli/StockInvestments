@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace StockInvestments.API.Helpers
 {
-    public enum EarningsCallTime
+    public enum EarningsCallTimeEnum
     {
         AM,
         PM

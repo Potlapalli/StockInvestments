@@ -61,11 +61,11 @@ namespace StockInvestments.API.Controllers
         public ActionResult<StockEarningDto> CreateStockEarning(StockEarningForCreationDto stockEarning)
         {
             var stockEarningEntity = _mapper.Map<StockEarning>(stockEarning);
-            if (!string.IsNullOrEmpty(stockEarningEntity.EarningsCallTime) &&
-                stockEarningEntity.EarningsCallTime != nameof(EarningsCallTime.AM) &&
-                stockEarningEntity.EarningsCallTime != nameof(EarningsCallTime.PM)) 
-                return BadRequest("Invalid Earnings call time provided");
-            
+            //if (!string.IsNullOrEmpty(stockEarningEntity.EarningsCallTime) &&
+            //    stockEarningEntity.EarningsCallTime != nameof(EarningsCallTime.AM) &&
+            //    stockEarningEntity.EarningsCallTime != nameof(EarningsCallTime.PM)) 
+            //    return BadRequest("Invalid Earnings call time provided. The value should be AM or PM.");
+
             _stockEarningsRepository.Add(stockEarningEntity);
 
             var stockEarningToReturn = _mapper.Map<StockEarningDto>(stockEarningEntity);

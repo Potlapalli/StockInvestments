@@ -16,6 +16,7 @@ namespace StockInvestments.API.Entities
         [Required(ErrorMessage = "Earnings date is required.")]
         public DateTimeOffset EarningsDate { get; set; }
 
+        [MaxLength(2)]
         public string EarningsCallTime { get; set; }
 
     }

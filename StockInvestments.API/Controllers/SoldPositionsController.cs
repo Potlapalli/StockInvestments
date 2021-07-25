@@ -99,7 +99,7 @@ namespace StockInvestments.API.Controllers
             return Ok(_mapper.Map<SoldPositionDto>(soldPositionFromRepo));
         }
 
-        //Get api/currentPositions/xxx/soldPositions
+        //Post api/currentPositions/xxx/soldPositions
         [HttpPost]
         public ActionResult<SoldPositionDto> CreateSoldPosition(string ticker, SoldPositionForCreationDto soldPosition)
         {
@@ -114,6 +114,45 @@ namespace StockInvestments.API.Controllers
             var soldPositionToReturn = _mapper.Map<SoldPositionDto>(soldPositionEntity);
             return CreatedAtRoute("GetSoldPositionForCurrentPosition", new { ticker = ticker, number = soldPositionToReturn.Number },
                 soldPositionToReturn);
+        }
+
+        //Delete api/currentPositions/xxx/soldPositions/1
+        [HttpDelete("{number}")]
+        public ActionResult DeleteSoldPositionForCurrentPosition(string ticker, long number)
+        {
+            if (!_currentPositionsRepository.CurrentPositionExists(ticker))
+            {
+                return NotFound($"No current position found for the ticker {ticker}.");
+            }
+
+            var soldPositionFromRepo = _soldPositionsRepository.GetSoldPosition(ticker, number);
+            if (soldPositionFromRepo == null)
+                return NotFound("Sold Position couldn't be found.");
+
+            _soldPositionsRepository.Delete(soldPositionFromRepo);
+
+            return NoContent();
+        }
+
+        //Delete api/currentPositions/xxx/soldPositions
+        [HttpDelete]
+        public ActionResult DeleteSoldPositionsForCurrentPosition(string ticker)
+        {
+            if (!_currentPositionsRepository.CurrentPositionExists(ticker))
+            {
+                return NotFound($"No current position found for the ticker {ticker}.");
+            }
+
+            var soldPositionsFromRepo = _soldPositionsRepository.GetSoldPositions(ticker);
+            if (soldPositionsFromRepo == null || soldPositionsFromRepo.Count() == 0)
+                return NotFound("Sold Positions couldn't be found.");
+
+            foreach (var soldPositionFromRepo in soldPositionsFromRepo)
+            {
+                _soldPositionsRepository.Delete(soldPositionFromRepo);
+            }
+            
+            return NoContent();
         }
     }
 }
