@@ -9,17 +9,37 @@ namespace StockInvestments.API.DbContexts
 {
     public class StockInvestmentsContext : DbContext
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
         public StockInvestmentsContext(DbContextOptions<StockInvestmentsContext> options)
             : base(options)
         {
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<CurrentPosition> CurrentPositions { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<SoldPosition> SoldPositions { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<ClosedPosition> ClosedPositions { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<StockEarning> StockEarnings { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CurrentPosition>().HasData(new CurrentPosition

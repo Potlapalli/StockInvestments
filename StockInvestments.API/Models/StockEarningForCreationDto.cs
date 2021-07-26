@@ -8,19 +8,16 @@ using StockInvestments.API.ValidationAttributes;
 
 namespace StockInvestments.API.Models
 {
-    [EarningsCallTimeShouldBeAMOrPMAtrribute(ErrorMessage = "Invalid Earnings call time provided. The value should be AM or PM")]
-    public class StockEarningForCreationDto /*: IValidatableObject*/
+    /// <summary>
+    /// 
+    /// </summary>
+    public class StockEarningForCreationDto :  StockEarningForManipulationDto /*: IValidatableObject*/
     {
-        [Required]
+        /// <summary>
+        /// 
+        /// </summary>
+        [Required(ErrorMessage = "Ticker is required.")]
         public string Ticker { get; set; }
-
-        public string Company { get; set; }
-
-        [Required(ErrorMessage = "Earnings date is required.")]
-        public DateTimeOffset EarningsDate { get; set; }
-
-        [MaxLength(2)]
-        public string EarningsCallTime { get; set; }
 
         //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         //{

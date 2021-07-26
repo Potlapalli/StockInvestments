@@ -12,6 +12,7 @@ namespace StockInvestments.API.Profiles
         {
             CreateMap<Entities.StockEarning, Models.StockEarningDto>();
             CreateMap<Models.StockEarningForCreationDto, Entities.StockEarning>();
+            CreateMap<Models.StockEarningForManipulationDto, Entities.StockEarning>();
         }
     }
 }

@@ -18,12 +18,12 @@
             <response code="201">Returns the newly created CurrentPosition</response>
             <response code="400">If the CurrentPosition is null</response>
         </member>
-        <member name="T:StockInvestments.API.Repositories.SoldPositionsRepository">
+        <member name="T:StockInvestments.API.Services.SoldPositionsRepository">
             <summary>
             
             </summary>
         </member>
-        <member name="M:StockInvestments.API.Repositories.SoldPositionsRepository.#ctor(StockInvestments.API.DbContexts.StockInvestmentsContext)">
+        <member name="M:StockInvestments.API.Services.SoldPositionsRepository.#ctor(StockInvestments.API.DbContexts.StockInvestmentsContext)">
             <summary>
             
             </summary>

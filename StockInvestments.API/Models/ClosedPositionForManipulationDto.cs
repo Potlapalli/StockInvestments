@@ -4,35 +4,28 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StockInvestments.API.Entities
+namespace StockInvestments.API.Models
 {
     /// <summary>
     /// 
     /// </summary>
-    public class StockEarning
+    public abstract class ClosedPositionForManipulationDto
     {
         /// <summary>
         /// 
         /// </summary>
-        [Key]
+        [Required(ErrorMessage = "Ticker is required.")]
         public string Ticker { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Company { get; set; }
+        public virtual string Company { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Required(ErrorMessage = "Earnings date is required.")]
-        public DateTimeOffset EarningsDate { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [MaxLength(2)]
-        public string EarningsCallTime { get; set; }
-
+        [Required(ErrorMessage = "FinalValue is required.")]
+        public double FinalValue { get; set; }
     }
 }

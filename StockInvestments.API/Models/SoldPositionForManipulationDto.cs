@@ -4,29 +4,18 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StockInvestments.API.Entities
+namespace StockInvestments.API.Models
 {
     /// <summary>
     /// 
     /// </summary>
-    public class CurrentPosition
+    public abstract class SoldPositionForManipulationDto
     {
         /// <summary>
         /// 
         /// </summary>
-        [Key]
-        public string Ticker { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Company { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [Required(ErrorMessage = "PurchasePrice is required.")]
-        public double PurchasePrice { get; set; }
+        [Required(ErrorMessage = "SellingPrice is required.")]
+        public double SellingPrice { get; set; }
 
         /// <summary>
         /// 
@@ -39,10 +28,5 @@ namespace StockInvestments.API.Entities
         /// </summary>
         [Required(ErrorMessage = "TotalAmount is missing.")]
         public double TotalAmount { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ICollection<SoldPosition> SoldPositions { get; set; } = new List<SoldPosition>();
     }
 }

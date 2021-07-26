@@ -18,8 +18,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using StockInvestments.API.DbContexts;
-using StockInvestments.API.Repositories;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using StockInvestments.API.Contracts;
+using StockInvestments.API.Services;
 
 namespace StockInvestments.API
 {

@@ -12,6 +12,7 @@ namespace StockInvestments.API.Profiles
         {
             CreateMap<Entities.ClosedPosition, Models.ClosedPositionDto>();
             CreateMap<Models.ClosedPositionForCreationDto, Entities.ClosedPosition>();
+            CreateMap<Models.ClosedPositionForManipulationDto, Entities.ClosedPosition>();
         }
     }
 }

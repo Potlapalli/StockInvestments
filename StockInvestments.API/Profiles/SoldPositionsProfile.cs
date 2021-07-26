@@ -12,6 +12,7 @@ namespace StockInvestments.API.Profiles
         {
             CreateMap<Entities.SoldPosition, Models.SoldPositionDto>();
             CreateMap<Models.SoldPositionForCreationDto , Entities.SoldPosition>();
+            CreateMap<Models.SoldPositionForUpdateDto, Entities.SoldPosition>();
         }
     }
 }

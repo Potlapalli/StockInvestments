@@ -9,7 +9,7 @@ namespace StockInvestments.API.Models
     /// <summary>
     /// 
     /// </summary>
-    public class SoldPositionForCreationDto : SoldPositionForManipulationDto
+    public class SoldPositionForUpdateDto : SoldPositionForManipulationDto
     {
         
     }

@@ -13,13 +13,13 @@ namespace StockInvestments.API.ValidationAttributes
         protected override ValidationResult IsValid(object value,
             ValidationContext validationContext)
         {
-            var stockEarning = (StockEarningForCreationDto)validationContext.ObjectInstance;
+            var stockEarning = (StockEarningForManipulationDto)validationContext.ObjectInstance;
 
             if (stockEarning.EarningsCallTime != nameof(EarningsCallTimeEnum.AM) &&
                 stockEarning.EarningsCallTime != nameof(EarningsCallTimeEnum.PM))
             {
                 return new ValidationResult(ErrorMessage,
-                    new[] { nameof(StockEarningForCreationDto) });
+                    new[] { nameof(StockEarningForManipulationDto) });
             }
 
             return ValidationResult.Success;

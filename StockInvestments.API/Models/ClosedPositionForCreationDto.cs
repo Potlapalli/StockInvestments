@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace StockInvestments.API.Models
 {
-    public class ClosedPositionForCreationDto
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ClosedPositionForCreationDto : ClosedPositionForManipulationDto
     {
-        [Required(ErrorMessage = "Ticker is required.")]
-        public string Ticker { get; set; }
-
-        public string Company { get; set; }
-
-        [Required]
-        public double FinalValue { get; set; }
+       
     }
 }

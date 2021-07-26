@@ -6,21 +6,20 @@ using System.Threading.Tasks;
 
 namespace StockInvestments.API.Models
 {
-    public class CurrentPositionForCreationDto
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CurrentPositionForCreationDto : CurrentPositionForManipulationDto
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        [Required(ErrorMessage = "Ticker is required.")]
         public string Ticker { get; set; }
 
-        public string Company { get; set; }
-
-        [Required(ErrorMessage = "PurchasePrice is required.")]
-        public double PurchasePrice { get; set; }
-
-        [Required(ErrorMessage = "TotalShares is required.")]
-        public double TotalShares { get; set; }
-
-        [Required(ErrorMessage = "TotalAmount is missing.")]
-        public double TotalAmount { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public ICollection<SoldPositionForCreationDto> SoldPositions { get; set; }
             = new List<SoldPositionForCreationDto>();
     }
