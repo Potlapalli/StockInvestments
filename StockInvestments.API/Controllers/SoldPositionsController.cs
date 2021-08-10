@@ -4,7 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using StockInvestments.API.Contracts;
 using StockInvestments.API.Entities;
 using StockInvestments.API.Models;
@@ -17,6 +22,7 @@ namespace StockInvestments.API.Controllers
     /// </summary>
     [Route("api/currentPositions/{ticker}/soldPositions")]
     [ApiController]
+    //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class SoldPositionsController : ControllerBase
     {
         private readonly ICurrentPositionsRepository _currentPositionsRepository;
@@ -51,9 +57,9 @@ namespace StockInvestments.API.Controllers
         /// <param name="ticker"></param>
         /// <returns>SoldPositionsForCurrentPosition</returns>
         /// <response code="200">Returns SoldPositions list</response>
-        /// <response code="404">If the Current Position couldn't be found</response>
+        /// <response code="404">If the current position couldn't be found</response>
         //Get api/currentPositions/xxx/soldPositions
-        [HttpGet]
+        [HttpGet(Name = "GetSoldPositionsForCurrentPosition")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<SoldPositionDto>> GetSoldPositionsForCurrentPosition(string ticker)
@@ -173,14 +179,12 @@ namespace StockInvestments.API.Controllers
         /// <response code="201">Returns the newly added sold position</response>
         /// <response code="404">If the current position is not found</response>
         /// <response code="204">If the Current Position is deleted</response>
-        /// <response code="400">If the Total number of shares be sold is more than total shares currently available</response>
         //Post api/currentPositions/xxx/soldPositions
-        [HttpPost]
+        [HttpPost(Name = "CreateSoldPosition")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<SoldPositionDto> CreateSoldPosition(string ticker, SoldPositionForCreationDto soldPosition)
+        public IActionResult CreateSoldPosition(string ticker, SoldPositionForCreationDto soldPosition)
         {
             if (!_currentPositionsRepository.CurrentPositionExists(ticker))
             {
@@ -189,36 +193,12 @@ namespace StockInvestments.API.Controllers
 
             var soldPositionEntity = _mapper.Map<SoldPosition>(soldPosition);
 
-            var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
-
-            var sharesRemaining = _soldPositionsRepository.GetSharesRemaining(currentPosition);
-
-            if (sharesRemaining + soldPositionEntity.TotalShares > currentPosition.TotalShares)
-            {
-                return BadRequest($"Total number of shares be sold is more than total shares currently available");
-            }
-
-            if (sharesRemaining + soldPositionEntity.TotalShares == currentPosition.TotalShares)
-            {
-                var totalAmount= _soldPositionsRepository.GetSoldPositionsTotalAmount(ticker);
-                var closedPosition = new ClosedPosition()
-                {
-                    Ticker = ticker,
-                    Company = currentPosition.Company,
-                    FinalValue = (soldPositionEntity.TotalAmount + totalAmount)/ currentPosition.TotalShares - currentPosition.TotalAmount
-
-                };
-                _closedPositionsRepository.Add(closedPosition);
-                _soldPositionsRepository.Save();
-                _currentPositionsRepository.Delete(currentPosition);
-                _soldPositionsRepository.Save();
-
-                return NoContent();
-            }
-
             _soldPositionsRepository.Add(ticker, soldPositionEntity);
             _soldPositionsRepository.Save();
 
+            if (AddClosedPositionBasedOnTotalShares(ticker, soldPositionEntity)) 
+                return NoContent();
+            
             var soldPositionToReturn = _mapper.Map<SoldPositionDto>(soldPositionEntity);
             return CreatedAtRoute("GetSoldPositionForCurrentPosition",
                 new {ticker = ticker, number = soldPositionToReturn.Number},
@@ -234,11 +214,13 @@ namespace StockInvestments.API.Controllers
         /// <returns></returns>
         /// <response code="204">If the sold position is updated</response>
         /// <response code="404">If the Current Position or sold position couldn't be found</response>
+        /// <response code="201">If the sold position is created</response>
         //Put api/currentPositions/xxx/soldPositions/1
         [HttpPut("{number}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateSoldPositionForCurrentPosition(string ticker, long number, SoldPositionForUpdateDto soldPosition)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public IActionResult UpdateSoldPositionForCurrentPosition(string ticker, long number, SoldPositionForUpdateDto soldPosition)
         {
             if (!_currentPositionsRepository.CurrentPositionExists(ticker))
             {
@@ -247,36 +229,101 @@ namespace StockInvestments.API.Controllers
 
             var soldPositionFromRepo = _soldPositionsRepository.GetSoldPosition(ticker, number);
             if (soldPositionFromRepo == null)
-                return NotFound("Sold Position couldn't be found.");
+            {
+                var soldPositionEntity = _mapper.Map<SoldPosition>(soldPosition);
+                soldPositionEntity.Number = number;
+
+                _soldPositionsRepository.Add(ticker, soldPositionEntity);
+                _soldPositionsRepository.Save();
+
+                if (AddClosedPositionBasedOnTotalShares(ticker, soldPositionEntity))
+                    return NoContent();
+
+                var soldPositionToReturn = _mapper.Map<SoldPositionDto>(soldPositionEntity);
+                return CreatedAtRoute("GetSoldPositionForCurrentPosition",
+                    new { ticker = ticker, number = soldPositionToReturn.Number },
+                    soldPositionToReturn);
+            }
 
             _mapper.Map(soldPosition, soldPositionFromRepo);
 
             _soldPositionsRepository.Update(soldPositionFromRepo);
             _soldPositionsRepository.Save();
 
-            var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
+            if (AddClosedPositionBasedOnTotalShares(ticker, soldPositionFromRepo))
+                return NoContent();
 
-            var sharesRemaining = _soldPositionsRepository.GetSharesRemaining(currentPosition);
-      
-            if (sharesRemaining  == 0)
-            {
-                var totalAmount = _soldPositionsRepository.GetSoldPositionsTotalAmount(ticker);
-                var closedPosition = new ClosedPosition()
-                {
-                    Ticker = ticker,
-                    Company = currentPosition.Company,
-                    FinalValue = (totalAmount) / currentPosition.TotalShares - currentPosition.TotalAmount
-
-                };
-                _closedPositionsRepository.Add(closedPosition);
-                _soldPositionsRepository.Save();
-                _currentPositionsRepository.Delete(currentPosition);
-                _soldPositionsRepository.Save();
-            }
-        
             return NoContent();
         }
 
+        /// <summary>
+        /// PartiallyUpdateSoldPositionForCurrentPosition
+        /// </summary>
+        /// <param name="ticker"></param>
+        /// <param name="number"></param>
+        /// <param name="patchDocument"></param>
+        /// <returns></returns>
+        /// <response code="204">If the sold position is updated</response>
+        /// <response code="404">If the Current Position or sold position couldn't be found</response>
+        /// <response code="201">If the sold position is created</response>
+        //Patch api/currentPositions/xxx/soldPositions/1
+        [HttpPatch("{number}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public IActionResult PartiallyUpdateSoldPositionForCurrentPosition(string ticker, long number, JsonPatchDocument<SoldPositionForUpdateDto> patchDocument)
+        {
+            if (!_currentPositionsRepository.CurrentPositionExists(ticker))
+            {
+                return NotFound($"No current position found for the ticker {ticker}.");
+            }
+
+            var soldPositionFromRepo = _soldPositionsRepository.GetSoldPosition(ticker, number);
+            if (soldPositionFromRepo == null)
+            {
+                var soldPositionForUpdateDto = new SoldPositionForUpdateDto();
+                patchDocument.ApplyTo(soldPositionForUpdateDto, ModelState);
+
+                if (!TryValidateModel(soldPositionForUpdateDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+
+                var soldPositionEntity = _mapper.Map<SoldPosition>(soldPositionForUpdateDto);
+                soldPositionEntity.Number = number;
+
+                _soldPositionsRepository.Add(ticker, soldPositionEntity);
+                _soldPositionsRepository.Save();
+
+                if (AddClosedPositionBasedOnTotalShares(ticker, soldPositionEntity))
+                    return NoContent();
+              
+                var soldPositionToReturn = _mapper.Map<SoldPositionDto>(soldPositionEntity);
+                return CreatedAtRoute("GetSoldPositionForCurrentPosition",
+                    new { ticker = ticker, number = soldPositionToReturn.Number },
+                    soldPositionToReturn);
+            }
+
+            var  soldPositionToPatch= _mapper.Map<SoldPositionForUpdateDto>(soldPositionFromRepo);
+            patchDocument.ApplyTo(soldPositionToPatch, ModelState);
+
+            if (!TryValidateModel(soldPositionToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            _mapper.Map(soldPositionToPatch, soldPositionFromRepo);
+
+            _soldPositionsRepository.Update(soldPositionFromRepo);
+            _soldPositionsRepository.Save();
+
+            if (AddClosedPositionBasedOnTotalShares(ticker, soldPositionFromRepo))
+                return NoContent();
+
+            return NoContent();
+        }
+
+        
         /// <summary>
         /// DeleteSoldPositionForCurrentPosition
         /// </summary>
@@ -335,6 +382,62 @@ namespace StockInvestments.API.Controllers
             }
             
             return NoContent();
+        }
+
+        private bool AddClosedPositionBasedOnTotalShares(string ticker, SoldPosition soldPositionEntity)
+        {
+            var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
+
+            var sharesRemaining = _soldPositionsRepository.GetSharesRemaining(currentPosition);
+
+            if (sharesRemaining == 0)
+            {
+                var totalAmount = _soldPositionsRepository.GetSoldPositionsTotalAmount(ticker);
+                var closedPosition = new ClosedPosition()
+                {
+                    Ticker = ticker,
+                    Company = currentPosition.Company,
+                    FinalValue = totalAmount - currentPosition.TotalAmount
+                };
+                _closedPositionsRepository.Add(closedPosition);
+                _soldPositionsRepository.Save();
+                _currentPositionsRepository.Delete(currentPosition);
+                _soldPositionsRepository.Save();
+
+                return true;
+            }
+
+            //var currentPosition = _currentPositionsRepository.GetCurrentPosition(ticker);
+
+            //var sharesRemaining = _soldPositionsRepository.GetSharesRemaining(currentPosition);
+
+            //if (sharesRemaining == 0)
+            //{
+            //    var totalAmount = _soldPositionsRepository.GetSoldPositionsTotalAmount(ticker);
+            //    var closedPosition = new ClosedPosition()
+            //    {
+            //        Ticker = ticker,
+            //        Company = currentPosition.Company,
+            //        FinalValue = (totalAmount) / currentPosition.TotalShares - currentPosition.TotalAmount
+
+            //    };
+            //    _closedPositionsRepository.Add(closedPosition);
+            //    _soldPositionsRepository.Save();
+            //    _currentPositionsRepository.Delete(currentPosition);
+            //    _soldPositionsRepository.Save();
+            //}
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelStateDictionary"></param>
+        /// <returns></returns>
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }
