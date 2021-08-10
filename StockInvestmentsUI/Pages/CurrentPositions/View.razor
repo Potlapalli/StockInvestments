@@ -1,0 +1,82 @@
+﻿@page "/currentPositions/view/{ticker}"
+@inject ICurrentPositionRepository _repo
+@inject NavigationManager _navigationManager
+<h3 class="card-title">CurrentPosition</h3>
+<br />
+
+@if (Model == null)
+{
+    <LoadingMessage Message="Loading CurrentPosition Details..."></LoadingMessage>
+}
+else
+{
+    <div class="col-md-4">
+        <table class="table table-responsive">
+            <tr>
+                <td><strong>Ticker</strong></td>
+                <td>@Model.Ticker</td>
+            </tr>
+            <tr>
+                <td><strong>Company</strong></td>
+                <td>@Model.Company</td>
+            </tr>
+            <tr>
+                <td><strong>PurchasePrice</strong></td>
+                <td>@string.Format("{0:C}", Model.PurchasePrice)</td>
+            </tr>
+            <tr>
+                <td><strong>TotalShares</strong></td>
+                <td>@Model.TotalShares</td>
+            </tr>
+            <tr>
+                <td><strong>TotalAmount</strong></td>
+                <td>@string.Format("{0:C}", Model.TotalAmount)</td>
+            </tr>
+        </table>
+        <br />
+
+        @if (Model.SoldPositions == null || Model.SoldPositions.Count < 1)
+        {
+            <LoadingMessage Message="No SoldPositions for the CurrentPosition"></LoadingMessage>
+        }
+        else
+        {
+            <div class="card" style="width: 25rem;">
+                <div class="card-header">
+                    <h4>SoldPositions</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var soldPosition in Model.SoldPositions)
+                    {
+                    <li class="list-group-item">TotalShares: @soldPosition.TotalShares  SellingPrice: @string.Format("{0:C}", soldPosition.SellingPrice)   </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+}
+<br />
+
+<button @onclick="BackToList" class="btn btn-outline-secondary">
+    <span class="oi oi-media-skip-backward"></span>
+    Back To List
+</button>
+
+
+@code {
+    [Parameter]
+    public string Ticker { get; set; }
+
+    private CurrentPosition Model = new CurrentPosition();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model = await _repo.Get(Endpoints.CurrentPositionsEndpoint, Ticker);
+    }
+
+    private void BackToList()
+    {
+        _navigationManager.NavigateTo("/currentPositions/");
+    }
+
+}
