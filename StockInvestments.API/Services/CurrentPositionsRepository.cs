@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using StockInvestments.API.Contracts;
 using StockInvestments.API.DbContexts;
 using StockInvestments.API.Entities;
@@ -33,7 +34,8 @@ namespace StockInvestments.API.Services
 
         public CurrentPosition GetCurrentPosition(string ticker)
         {
-            return _stockInvestmentsContext.CurrentPositions.FirstOrDefault(cp => cp.Ticker == ticker);
+            return _stockInvestmentsContext.CurrentPositions.
+                Include(x => x.SoldPositions).FirstOrDefault(cp => cp.Ticker == ticker);
         }
 
         public void Add(CurrentPosition currentPosition)
